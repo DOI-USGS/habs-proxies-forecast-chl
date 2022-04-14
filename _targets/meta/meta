@@ -1,0 +1,7 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+p0_forecast_site_ids|stem|5dfe2888a7fde99a|9e7c5c6eef06830c|a3dad144c40657ed|-1391166506||t19093.4954345s|316cc09d68060f29|67|rds|local|vector|||0||
+p0_site_metadata|stem|196062278e85212f|60650779f4296762|a9e59ddb26654d78|952561597||t19093.4954457936s|f1b11cbbfe020869|1990|rds|local|vector|||0.92||
+p0_target_var|stem|a4b87ab304c2e0f3|a37104b82e0726b4|ef46db3751d8e999|1141426603||t19093.6132937166s|65d748ee46b4c59e|58|rds|local|vector|||0||
+p0_targets_list|object|eeb4d2881c8b8168|||||||||||||||
+p0_team_list|stem|ab89f0a809408cb0|227041e9b23c14b6|8fb75deda0f036e8|-1894814218||t19093.4932226893s|03ef7a88723dc598|242|rds|local|vector|||0||
+p0_team_name|stem|76a6ac6348a3a9c6|977906029cbfce37|ef46db3751d8e999|-955031030||t19093.6132930685s|35a2cf8917c74ac4|71|rds|local|vector|||0||
