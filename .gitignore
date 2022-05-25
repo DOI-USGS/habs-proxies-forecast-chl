@@ -40,3 +40,5 @@ vignettes/*.pdf
 
 # don't commit large output files 
 */out/*
+
+*_targets/*
