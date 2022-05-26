@@ -16,6 +16,11 @@ train_model <- function(driver_file,
   
   browser() 
   
+  # summarize to daily mean values 
+  drivers <- drivers %>% 
+    group_by(time) %>% 
+    summarise(across(!!target_vars) )
+  
   
 }
 
