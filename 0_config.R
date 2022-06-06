@@ -1,7 +1,9 @@
 # sourcing functions
 # source("0_config/src/")
 
-
+# see https://github.com/eco4cast/neon4cast-example for example forecast 
+# and how to run in github actions 
+ 
 # target list
 p0_targets_list = list(
   
