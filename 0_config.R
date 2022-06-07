@@ -9,7 +9,7 @@ p0_targets_list = list(
   
   tar_target(
     p0_team_name, 
-    "USGS_HABs_Proxies"
+    "USGSHABs1"
   ),
   
   tar_target(

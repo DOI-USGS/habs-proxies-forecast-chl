@@ -295,12 +295,6 @@ forecast = function(trained_model,
                    n_params_est = n_params_est,
                    n_step = n_step,
                    n_en = n_en)
-   
-  Y_forecast = get_Y_forecast_vector(n_states = n_states_est,
-                                     n_params_est = n_params_est,
-                                     n_step = 1,
-                                     f_horizon = f_horizon, 
-                                     n_en = n_en)
   
   # observation error matrix
   R = get_obs_error_matrix(n_states = n_states_est,
@@ -328,16 +322,7 @@ forecast = function(trained_model,
                    n_en = n_en,
                    state_sd = init_cond_sd,
                    param_sd = 0)
-  browser() 
-  # get driver data with uncertainty - dim = c(n_step, driver, n_en) 
-  # drivers = get_drivers(drivers_df = drivers_df, 
-  #                       model_dates = dates,
-  #                       n_drivers = 3, 
-  #                       driver_colnames = c('doc_load', 'water_out', 'lake_vol'), 
-  #                       driver_cv = driver_cv, 
-  #                       n_step = n_step, 
-  #                       n_en = n_en) 
-  
+
   # start modeling
   for(t in 2:n_step){
     print(sprintf("starting %s", dates[t]))
@@ -372,23 +357,26 @@ forecast = function(trained_model,
                         n_en = n_en,
                         cur_step = t) # updating params / states if obs available
     }
-    print(sprintf("done with %s", dates[t]))
   }
-  browser() 
 
   forecasted_dates <- unique(forecasted_drivers_df$time)
   out <- expand_grid(time = forecasted_dates, 
                      ensemble = 0:30) %>% 
-    mutate(chla = NA)
-  # store today's day 0 prediction in Y_forecast 
+    mutate(chla = NA,
+           siteID = site) 
+  # store today's day 0 prediction in out
   out$chla[out$time == forecasted_dates[1]] = Y[1,n_step,]
   
   for(t in 2:f_horizon){
+    print(sprintf("starting %s", forecasted_dates[t]))
     if(t < 17){
+      # 31 ensembles for first 16 days 
       n_en = 31
     }else{
+      # only 8 ensembles for days 17-35
       n_en = 8
     }
+     
     for(n in 1:n_en){
       if(t < 17){
         ens_driver = n-1 
@@ -396,21 +384,24 @@ forecast = function(trained_model,
       cur_drivers <- filter(forecasted_drivers_df, 
                             time == forecasted_dates[t],
                             ensemble == ens_driver)
+      chla_lagged_1 <- filter(out, 
+                              time == forecasted_dates[t-1],
+                              ensemble == ens_driver) %>% 
+        pull(chla) 
       
       # run model; 
       model_output <- predict_chla(trained_model = trained_model,
-                                   chla_lagged_1 = Y_forecast[1, 1, t-1, n],
+                                   chla_lagged_1 = chla_lagged_1,
                                    air_temp = cur_drivers$air_temperature,
                                    swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
                                    precip = cur_drivers$precipitation_flux)
       
-      out$chla[out$time == forecasted_dates[t] & out$ensemble == (n-1)] = model_output$chla 
+      out$chla[out$time == forecasted_dates[t] & out$ensemble == ens_driver] = model_output$chla 
       # Y_forecast[1, 1, t, n] = model_output$chla # store in Y vector
     }
   }
-  browser() 
 
-  
+  write_csv(x = out, file = out_file)
   return(out_file) 
 }
 

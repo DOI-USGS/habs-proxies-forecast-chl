@@ -33,6 +33,7 @@ p1_targets_list = list(
     # # install.packages("remotes")
     # remotes::install_github("cboettig/aws.s3") 
     # remotes::install_github("eco4cast/neon4cast")
+    # remotes::install_github("eco4cast/EFIstandards")
     # 
     # library(neon4cast) 
     # library(aws.s3) 

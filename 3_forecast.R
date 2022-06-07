@@ -1,5 +1,5 @@
 # sourcing functions
-source("3_forecast/src/EnKF_functions.R")
+source("3_forecast/src/forecast.R")
 source("2_model/src/chla_models.R")
 
 # packages needed for these targets
@@ -55,6 +55,21 @@ p3_targets_list = list(
     pattern = map(p0_forecast_site_ids,
                   p2_train_model,
                   p3_chla_obs_cv)
+  ), 
+  
+  tar_target(
+    # combine forecasts from all sites 
+    p3_all_forecasts_csv,
+    {
+      out_file <- paste0("3_forecast/out/aquatics", "-", 
+                         p1_forecast_issue_date ,"-", 
+                         p0_team_name, ".csv")
+      all_forecasts <- read_csv(p3_forecast_csv) %>% bind_rows() 
+      write_csv(all_forecasts, out_file) 
+      # validate forecast 
+      neon4cast::forecast_output_validator(out_file)
+      return(out_file) 
+    }
   )
   
   

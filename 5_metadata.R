@@ -2,6 +2,8 @@
 
 # packages needed for these targets
 tar_option_set(packages = c(
+  "EFIstandards",
+  "neon4cast",
   "tsibble")
 )
 
@@ -9,8 +11,8 @@ tar_option_set(packages = c(
 p5_targets_list = list(
   
   tar_target(
-    p5_metadata_to_submit,
-    neon4cast::generate_metadata(forecast_file = forecast_file,
+    p5_metadata_to_submit_xml,
+    neon4cast::generate_metadata(forecast_file = p3_all_forecasts_csv,
                                  team_list = p0_team_list,
                                  model_metadata =  p5_model_metadata)
   ),
