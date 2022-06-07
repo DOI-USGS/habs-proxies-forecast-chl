@@ -17,8 +17,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v1
+      # - name: Setup R
+      #   uses: r-lib/actions/setup-r@v1
 
 # from https://github.com/actions/cache/blob/main/examples.md#r---renv
       - name: Set RENV_PATHS_ROOT
