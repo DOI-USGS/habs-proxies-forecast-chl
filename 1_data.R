@@ -150,7 +150,7 @@ p1_targets_list = list(
     p1_historic_gefs_daily_rds,
     summarize_drivers(in_file = p1_historic_drivers_noaa_gefs_rds,
                       vars = p1_met_drivers, 
-                      group_by_ens = FALSE, 
+                      group_by_ens = TRUE, 
                       out_file = "1_data/out/historic_gefs_daily.rds")
   ),
   tar_target(

@@ -4,9 +4,6 @@ source("2_model/src/chla_models.R")
 
 # packages needed for these targets
 tar_option_set(packages = c(
-  "aws.s3", 
-  "ncdf4", 
-  "neon4cast",
   "tsibble")
 )
 
