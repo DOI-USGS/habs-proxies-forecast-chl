@@ -9,11 +9,13 @@ options(tidyverse.quiet = TRUE,
 source("0_config.R")
 source("1_data.R") 
 source("2_model.R") 
+source("3_forecast.R")
 
 # complete list of targets
 c(p0_targets_list, 
   p1_targets_list,
-  p2_targets_list) 
+  p2_targets_list,
+  p3_targets_list) 
 
 # Instructions for environment variables when running in github actions 
 # 1) Run install.packages("renv") in R.
