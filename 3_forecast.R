@@ -26,10 +26,15 @@ p3_targets_list = list(
   ),
   
   tar_target(
+    p3_n_en, 
+    31
+  ),
+  
+  tar_target(
     # produce forecast for each site 
     p3_forecast_csv,
     forecast(trained_model = p2_train_model,
-             n_en = 31, 
+             n_en = p3_n_en,  
              start = p3_start_forecast,
              stop = p1_forecast_issue_date, 
              f_horizon = 35, # days  

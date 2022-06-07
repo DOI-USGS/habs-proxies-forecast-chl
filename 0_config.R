@@ -21,7 +21,23 @@ p0_targets_list = list(
          list(individualName = list(givenName = "Philip", 
                                     surName = "Savoy"),
               organizationName = "U.S. Geological Survey",
-              electronicMailAddress = "psavoy@usgs.gov"))
+              electronicMailAddress = "psavoy@usgs.gov"),
+         list(individualName = list(givenName = "Noah", 
+                                    surName = "Schmadel"),
+              organizationName = "U.S. Geological Survey",
+              electronicMailAddress = "nschmadel@usgs.gov"),
+         list(individualName = list(givenName = "Lisa", 
+                                    surName = "Lucas"),
+              organizationName = "U.S. Geological Survey",
+              electronicMailAddress = "llucas@usgs.gov"), 
+         list(individualName = list(givenName = "Judson", 
+                                    surName = "Harvey"),
+              organizationName = "U.S. Geological Survey",
+              electronicMailAddress = "jwharvey@usgs.gov"),
+         list(individualName = list(givenName = "Jennifer", 
+                                    surName = "Murphy"),
+              organizationName = "U.S. Geological Survey",
+              electronicMailAddress = "jmurphy@usgs.gov"))
   ),
   
   # variables we want to forecast 
