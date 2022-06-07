@@ -42,3 +42,9 @@ vignettes/*.pdf
 */out/*
 
 *_targets/*
+
+# in data 
+*/in/*
+
+# Rprofile created by renv 
+.Rprofile 
