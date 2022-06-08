@@ -40,3 +40,11 @@ vignettes/*.pdf
 
 # don't commit large output files 
 */out/*
+
+_targets/
+
+# in data 
+*/in/*
+
+# Rprofile created by renv 
+.Rprofile 
