@@ -7,7 +7,7 @@ NOTE: A lot of the details on standardized environment and automation come from 
 ### Setup the correct environment on your local machine 
 
 1) Run `install.packages("renv")` in R. https://rstudio.github.io/renv/index.html
-2) After the installation of `renv` finishes, run `renv::activate()` and `renv::restore()`. `renv` uses the `renv.lock` file committed to this repository to download and install the necessary packages to run this pipeline. We also use `renv` in GitHub to automatically run the pipeline using GitHub actions. 
+2) After the installation of `renv` finishes, run `renv::activate()` and `renv::restore()`. `renv` uses the `renv.lock` file committed to this repository to download and install the necessary packages to run this pipeline. `renv` installs the packages to a project-specific location (i.e. it doesn't update R packages installed elsewhere on your machine). _NOTE_: this might take a while to install all the necessary packages for this project. We also use `renv` in GitHub to automatically run the pipeline using GitHub actions. 
 3) If you make changes to the pipeline, especially if you're using a new package not already in use (or updating an existing package to a new version), run `renv::snapshot()` to update the `renv.lock` file with any new packages that you have added.  
 4) Commit and push any changes to your forked version of the repository and open a pull request.  
 
