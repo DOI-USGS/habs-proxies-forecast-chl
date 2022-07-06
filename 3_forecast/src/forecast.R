@@ -246,7 +246,7 @@ forecast = function(trained_model,
                     init_cond_cv = 0.01,
                     site,
                     out_file){
-  
+   
   trained_model = readRDS(trained_model) 
   start = as.Date(start)
   stop = as.Date(stop)

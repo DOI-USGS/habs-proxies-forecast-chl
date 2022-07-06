@@ -15,7 +15,9 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    Sys.Date() 
+    "2022-06-21",
+    # Sys.Date(),
+    cue = tar_cue(mode = "always")
   ),
   
   # all targets (i.e. observations) for the forecast sties 
@@ -43,6 +45,7 @@ p1_targets_list = list(
     # 
     # neon4cast::get_stacked_noaa_s3(".",site = "POSE", averaged = FALSE, s3_region="data")
     {
+      p1_forecast_issue_date
       Sys.setenv("AWS_DEFAULT_REGION" = "data",
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
       
@@ -50,6 +53,7 @@ p1_targets_list = list(
                                      site = p0_forecast_site_ids, 
                                      averaged = FALSE,
                                      s3_region="data")
+      return(p1_forecast_issue_date) 
     },
     # 8 variables (excluding dimension variables):
     # float air_temperature[time,latitude,longitude]   
@@ -115,8 +119,10 @@ p1_targets_list = list(
                                       site = p0_forecast_site_ids, 
                                       date = p1_forecast_issue_date, 
                                       cycle = "00")
+      return(p1_forecast_issue_date)
     },
-    pattern = map(p0_forecast_site_ids)
+    pattern = map(p0_forecast_site_ids),
+    cue = tar_cue(mode = "always")
   ), 
   
   tar_target(
@@ -152,14 +158,16 @@ p1_targets_list = list(
     summarize_drivers(in_file = p1_historic_drivers_noaa_gefs_rds,
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
-                      out_file = "1_data/out/historic_gefs_daily.rds")
+                      out_file = "1_data/out/historic_gefs_daily.rds"),
+    cue = tar_cue(mode = "always")
   ),
   tar_target(
     p1_forecasted_gefs_daily_rds,
     summarize_drivers(in_file = p1_forecasted_drivers_rds,
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
-                      out_file = "1_data/out/forecasted_gefs_daily.rds")
+                      out_file = "1_data/out/forecasted_gefs_daily.rds"),
+    cue = tar_cue(mode = "always")
   )
   
 )
