@@ -1,5 +1,6 @@
 # sourcing functions
 source("1_data/src/summarize_drivers.R")
+source("1_data/src/nwm_utils.R")
 
 # packages needed for these targets
 tar_option_set(packages = c(
@@ -15,7 +16,7 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    "2022-06-21",
+    as.Date("2022-08-01"),
     # Sys.Date(),
     cue = tar_cue(mode = "always")
   ),
@@ -23,15 +24,15 @@ p1_targets_list = list(
   # all targets (i.e. observations) for the forecast sties 
   tar_target(
     p1_aquatic_targets,
-    aquatic <- read_csv("https://data.ecoforecast.org/targets/aquatics/aquatics-targets.csv.gz") %>% 
-      dplyr::filter(siteID %in% p0_forecast_site_ids) %>% 
-      as_tsibble(index = time, key = siteID),
+    aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
+      dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
+      as_tsibble(index = time, key = c(site_id,variable)),
     cue = tar_cue(mode = "always")
   ),
   
   tar_target(
     # drivers for training models 
-    p1_historic_drivers_noaa_gefs_nc,
+    p1_historic_drivers_noaa_gefs_rds,
     # # install.packages("remotes")
     # remotes::install_github("cboettig/aws.s3") 
     # remotes::install_github("eco4cast/neon4cast")
@@ -44,100 +45,51 @@ p1_targets_list = list(
     # Sys.setenv("AWS_S3_ENDPOINT"="ecoforecast.org")
     # 
     # neon4cast::get_stacked_noaa_s3(".",site = "POSE", averaged = FALSE, s3_region="data")
+    # neon4cast::noaa_stage1()
     {
       p1_forecast_issue_date
       Sys.setenv("AWS_DEFAULT_REGION" = "data",
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
       
-      neon4cast::get_stacked_noaa_s3("1_data/in", 
-                                     site = p0_forecast_site_ids, 
-                                     averaged = FALSE,
-                                     s3_region="data")
-      return(p1_forecast_issue_date) 
-    },
-    # 8 variables (excluding dimension variables):
-    # float air_temperature[time,latitude,longitude]   
-    # units: K
-    # _FillValue: NaN
-    # float air_pressure[time,latitude,longitude]   
-    # units: Pa
-    # _FillValue: NaN
-    # float relative_humidity[time,latitude,longitude]   
-    # units: 1
-    # _FillValue: NaN
-    # float surface_downwelling_longwave_flux_in_air[time,latitude,longitude]   
-    # units: Wm-2
-    # _FillValue: NaN
-    # float surface_downwelling_shortwave_flux_in_air[time,latitude,longitude]   
-    # units: Wm-2
-    # _FillValue: NaN
-    # float precipitation_flux[time,latitude,longitude]   
-    # units: kgm-2s-1
-    # _FillValue: NaN
-    # float specific_humidity[time,latitude,longitude]   
-    # units: 1
-    # _FillValue: NaN
-    # float wind_speed[time,latitude,longitude]   
-    # units: ms-1
-    # _FillValue: NaN
-    # 3 dimensions:
-    # time  Size:14568 
-    # units: hours since 2020-09-25 00:00
-    # long_name: time
-    # latitude  Size:1 
-    # units: degree_north
-    # long_name: latitude
-    # longitude  Size:1 
-    # units: degree_east
-    # long_name: longitude
-    pattern = map(p0_forecast_site_ids)
-  ),
-  
-  tar_target(
-    # stack together historic drivers 
-    p1_historic_drivers_noaa_gefs_rds,
-    {
       out_file = "1_data/out/historic_gefs.rds"
-      p1_historic_drivers_noaa_gefs_nc
-      saveRDS(neon4cast::stack_noaa(dir = "1_data/in/drivers",
-                                    model = "NOAAGEFS_1hr_stacked"), 
-              file = out_file)
-      return(out_file)
+      
+      # connect to db 
+      historic_gefs <- neon4cast::noaa_stage3()
+      
+      # filter to sites we want and then pull down to local tibble 
+      historic_gefs %>% 
+        dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
+        dplyr::collect() %>% 
+        saveRDS(file = out_file) 
+      
+      return(out_file) 
     }
   ),
 
   
   tar_target(
     # get forecasted drivers for today's forecast issue date 
-    p1_forecasted_drivers_nc,
+    p1_forecasted_drivers_rds,
     {
       Sys.setenv("AWS_DEFAULT_REGION" = "data",
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
+
+      out_file = "1_data/out/forecasted_gefs.rds"
       
-      neon4cast::get_noaa_forecast_s3(dir = "1_data/in", 
-                                      model = "NOAAGEFS_1hr",
-                                      site = p0_forecast_site_ids, 
-                                      date = p1_forecast_issue_date, 
-                                      cycle = "00")
-      return(p1_forecast_issue_date)
+      # connect to db 
+      forecasted_gefs <- neon4cast::noaa_stage2()
+      
+      # filter to sites we want and then pull down to local tibble 
+      forecasted_gefs %>% 
+        dplyr::filter(site_id %in% p0_forecast_site_ids,
+                      start_date == as.character(p1_forecast_issue_date)) %>% 
+        dplyr::collect() %>% 
+        saveRDS(file = out_file) 
+      
+      return(out_file) 
     },
-    pattern = map(p0_forecast_site_ids),
     cue = tar_cue(mode = "always")
   ), 
-  
-  tar_target(
-    # stack together forecasted drivers 
-    p1_forecasted_drivers_rds,
-    {
-      out_file = "1_data/out/forecasted_gefs.rds"
-      p1_forecasted_drivers_nc
-      saveRDS(neon4cast::stack_noaa(dir = "1_data/in/drivers",
-                                    model = "NOAAGEFS_1hr", 
-                                    forecast_date = p1_forecast_issue_date),
-              file = out_file)
-      return(out_file) 
-    }
-  ),
   
   tar_target(
     p1_met_drivers,
@@ -169,5 +121,13 @@ p1_targets_list = list(
                       out_file = "1_data/out/forecasted_gefs_daily.rds"),
     cue = tar_cue(mode = "always")
   )
+  
+  # tar_target(
+  #   p1_historic_nwm_rds, 
+  #   download_nwm(sites = p0_site_metadata,
+  #                start_date = "2018-01-01",
+  #                end_date = p1_forecast_issue_date,
+  #                out_file = "1_data/out/historic_nwm.rds") 
+  # )
   
 )

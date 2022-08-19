@@ -123,13 +123,13 @@ get_obs_matrix = function(obs_df, model_dates, n_step, n_states){
 ##' @param n_en number of ensembles
 ##' @param cur_step current model timestep
 kalman_filter = function(Y, R, obs, H, n_en, cur_step){
-  
+   
   cur_obs = obs[ , , cur_step]
   
   cur_obs = ifelse(is.na(cur_obs), 0, cur_obs) # setting NA's to zero so there is no 'error' when compared to estimated states
   
   ###### estimate the spread of your ensembles #####
-  Y_mean = matrix(apply(Y[ , cur_step, ], MARGIN = 1, FUN = mean), nrow = length(Y[ , 1, 1])) # calculating the mean of each temp and parameter estimate
+  Y_mean = matrix(mean(Y[ , cur_step, ]), nrow = length(Y[ , 1, 1])) # calculating the mean of each temp and parameter estimate
   delta_Y = Y[ , cur_step, ] - matrix(rep(Y_mean, n_en), nrow = length(Y[ , 1, 1])) # difference in ensemble state/parameter and mean of all ensemble states/parameters
   
   ###### estimate Kalman gain #########
@@ -138,8 +138,10 @@ kalman_filter = function(Y, R, obs, H, n_en, cur_step){
   
   ###### update Y vector ######
   for(q in 1:n_en){
-    Y[, cur_step, q] = Y[, cur_step, q] + K %*% (cur_obs - H[, , cur_step] %*% Y[, cur_step, q]) # adjusting each ensemble using kalman gain and observations
+    error = (cur_obs + rnorm(1,0,R[,,cur_step])) - H[, , cur_step] %*% Y[, cur_step, q]
+    Y[, cur_step, q] = Y[, cur_step, q] + K %*% (error) # adjusting each ensemble using kalman gain and observations
   }
+   
   return(Y)
 }
 
@@ -255,17 +257,22 @@ forecast = function(trained_model,
   
   # get observation matrix
   all_obs_df = filter(obs, 
-                      siteID == site) %>% 
-    select(time, chla)
+                      site_id == site,
+                      variable == "chla") %>% 
+    pivot_wider(names_from = variable, values_from = observed) %>% 
+    select(time, chla) 
+    
   obs_df = filter(all_obs_df,
                   time >= start) 
   
   historic_drivers_df = readRDS(historic_driver_file) %>% 
-    filter(siteID == site) %>% 
+    filter(site_id == site) %>% 
+    pivot_wider(names_from = variable, values_from = predicted) %>% 
     select(time, ensemble, all_of(driver_vars))
   
   forecasted_drivers_df = readRDS(forecasted_driver_file) %>% 
-    filter(siteID == site, time >= stop) %>% 
+    filter(site_id == site, time >= stop) %>% 
+    pivot_wider(names_from = variable, values_from = predicted) %>% 
     select(time, ensemble, all_of(driver_vars))
 
   n_states_est <- n_states_est # number of states we're estimating 
@@ -273,7 +280,7 @@ forecast = function(trained_model,
   n_params_est <- n_params_est # number of parameters we're calibrating
   
   n_params_obs <- n_params_obs # number of parameters for which we have observations
-  
+   
   chla_init <- obs_df$chla[min(which(!is.na(obs_df$chla)))]
   if(is.na(chla_init)){
     chla_init <- mean(all_obs_df$chla, na.rm = T)
@@ -322,7 +329,7 @@ forecast = function(trained_model,
                    n_en = n_en,
                    state_sd = init_cond_sd,
                    param_sd = 0)
-
+   
   # start modeling
   for(t in 2:n_step){
     print(sprintf("starting %s", dates[t]))
@@ -330,17 +337,18 @@ forecast = function(trained_model,
       if(t < n_step){
         cur_drivers <- filter(historic_drivers_df, 
                               time == dates[t],
-                              ensemble == (n-1))
+                              ensemble == n)
       }else{
         cur_drivers <- filter(forecasted_drivers_df, 
                               time == dates[t],
-                              ensemble == (n-1))
+                              ensemble == n)
       }
       
       # run model; 
       model_output <- predict_chla(trained_model = trained_model,
                                    chla_lagged_1 = Y[1, t-1, n],
                                    air_temp = cur_drivers$air_temperature,
+                                   rh = cur_drivers$relative_humidity, 
                                    swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
                                    precip = cur_drivers$precipitation_flux)
       
@@ -358,12 +366,13 @@ forecast = function(trained_model,
                         cur_step = t) # updating params / states if obs available
     }
   }
+  
 
   forecasted_dates <- unique(forecasted_drivers_df$time)
   out <- expand_grid(time = forecasted_dates, 
-                     ensemble = 0:30) %>% 
+                     ensemble = 1:31) %>% 
     mutate(chla = NA,
-           siteID = site) 
+           site_id = site) 
   # store today's day 0 prediction in out
   out$chla[out$time == forecasted_dates[1]] = Y[1,n_step,]
   
@@ -379,7 +388,7 @@ forecast = function(trained_model,
      
     for(n in 1:n_en){
       if(t < 17){
-        ens_driver = n-1 
+        ens_driver = n
       }else{ens_driver = n}
       cur_drivers <- filter(forecasted_drivers_df, 
                             time == forecasted_dates[t],
@@ -393,6 +402,7 @@ forecast = function(trained_model,
       model_output <- predict_chla(trained_model = trained_model,
                                    chla_lagged_1 = chla_lagged_1,
                                    air_temp = cur_drivers$air_temperature,
+                                   rh = cur_drivers$relative_humidity, 
                                    swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
                                    precip = cur_drivers$precipitation_flux)
       
@@ -400,6 +410,7 @@ forecast = function(trained_model,
       # Y_forecast[1, 1, t, n] = model_output$chla # store in Y vector
     }
   }
+   
 
   write_csv(x = out, file = out_file)
   return(out_file) 

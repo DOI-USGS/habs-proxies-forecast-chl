@@ -1,9 +1,9 @@
 # sourcing functions
-# source("0_config/src/")
+source("0_config/src/metadata_utils.R")
 
 # see https://github.com/eco4cast/neon4cast-example for example forecast 
 # and how to run in github actions 
- 
+
 # target list
 p0_targets_list = list(
   
@@ -49,13 +49,16 @@ p0_targets_list = list(
   # sites we're forecasting at 
   tar_target(
     p0_forecast_site_ids,
-    c("COMO", "MCDI", "POSE")
+    c("BLWA", "FLNT", "TOMB")
   ),
   
   tar_target(
     p0_site_metadata,
-    read_csv("https://raw.githubusercontent.com/eco4cast/neon4cast-aquatics/master/Aquatic_NEON_Field_Site_Metadata_20210928.csv") %>% 
-      filter(field_site_id %in% p0_forecast_site_ids) 
+    read_csv("https://raw.githubusercontent.com/eco4cast/neon4cast-targets/main/NEON_Field_Site_Metadata_20220412.csv") %>% 
+      filter(field_site_id %in% p0_forecast_site_ids) %>% 
+      rowwise() %>% 
+      mutate(COMID = comid_from_point(field_latitude, field_longitude),
+             tz = get_tz(field_latitude, field_longitude)) %>% 
+      ungroup() 
   )
-  
 )
