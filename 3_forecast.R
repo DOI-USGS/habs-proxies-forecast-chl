@@ -12,12 +12,16 @@ p3_targets_list = list(
   
   tar_target(
     p3_chla_obs_cv,
-    filter(p1_aquatic_targets, siteID == p0_forecast_site_ids,
-           !is.infinite(chla), !is.infinite(chla_sd)) %>% 
-      mutate(chla_cv = (chla_sd / chla)) %>%
-      pull(chla_cv) %>% 
-      median(., na.rm = T),
-    pattern = map(p0_forecast_site_ids)
+    0.05
+    # sd is not stored anymore in the targets file
+    # filter(p1_aquatic_targets, 
+    #        site_id == p0_forecast_site_ids, 
+    #        variable == p0_target_var, 
+    #        !is.infinite(observed), !is.infinite(chla_sd)) %>% 
+    #   mutate(chla_cv = (chla_sd / chla)) %>%
+    #   pull(chla_cv) %>% 
+    #   median(., na.rm = T),
+    # pattern = map(p0_forecast_site_ids)
   ),
   
   tar_target(
@@ -53,8 +57,7 @@ p3_targets_list = list(
                                 p0_forecast_site_ids, 
                                 p1_forecast_issue_date)),
     pattern = map(p0_forecast_site_ids,
-                  p2_train_model,
-                  p3_chla_obs_cv)
+                  p2_train_model)
   ), 
   
   tar_target(

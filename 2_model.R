@@ -20,6 +20,7 @@ p2_targets_list = list(
     # covariates of the model 
     p2_driver_vars,
     c("air_temperature",
+      "relative_humidity", 
       "surface_downwelling_shortwave_flux_in_air",
       "precipitation_flux")
   ),
