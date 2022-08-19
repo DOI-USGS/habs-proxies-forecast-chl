@@ -5,10 +5,6 @@
       {
         "Name": "CRAN",
         "URL": "https://cloud.r-project.org"
-      },
-      {
-        "Name": "USGS",
-        "URL": "https://owi.usgs.gov/R"
       }
     ]
   },
