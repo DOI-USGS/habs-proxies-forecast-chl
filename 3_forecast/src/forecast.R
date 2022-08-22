@@ -233,6 +233,7 @@ get_drivers = function(drivers_df, model_dates, n_drivers, driver_colnames, driv
 #' @param init_cond_cv initial condition CV (what we're )
 forecast = function(trained_model, 
                     n_en = 31, 
+                    n_samples = 100, 
                     start,
                     stop, 
                     time_step = "days", 
@@ -254,7 +255,7 @@ forecast = function(trained_model,
   stop = as.Date(stop)
   dates = get_model_dates(model_start = start, model_stop = stop, time_step = time_step)
   n_step = length(dates)
-  
+   
   # get observation matrix
   all_obs_df = filter(obs, 
                       site_id == site,
@@ -301,7 +302,7 @@ forecast = function(trained_model,
   Y = get_Y_vector(n_states = n_states_est,
                    n_params_est = n_params_est,
                    n_step = n_step,
-                   n_en = n_en)
+                   n_en = n_en * n_samples)
   
   # observation error matrix
   R = get_obs_error_matrix(n_states = n_states_est,
@@ -326,7 +327,7 @@ forecast = function(trained_model,
                    n_params_est = n_params_est, 
                    n_params_obs = n_params_obs,
                    n_step = n_step, 
-                   n_en = n_en,
+                   n_en = n_en * n_samples,
                    state_sd = init_cond_sd,
                    param_sd = 0)
    
@@ -343,16 +344,24 @@ forecast = function(trained_model,
                               time == dates[t],
                               ensemble == n)
       }
+       
+      cur_drivers$chla_lagged_1 = mean(Y[1, t-1, ((n-1)*n_samples+1):(n*n_samples)], na.rm = T)
       
       # run model; 
       model_output <- predict_chla(trained_model = trained_model,
-                                   chla_lagged_1 = Y[1, t-1, n],
-                                   air_temp = cur_drivers$air_temperature,
-                                   rh = cur_drivers$relative_humidity, 
-                                   swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
-                                   precip = cur_drivers$precipitation_flux)
+                                   data = cur_drivers,
+                                   n_samples = n_samples)
+                                   # chla_lagged_1 = Y[1, t-1, n],
+                                   # air_temp = cur_drivers$air_temperature,
+                                   # rh = cur_drivers$relative_humidity, 
+                                   # swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
+                                   # precip = cur_drivers$precipitation_flux)
       
-      Y[1 , t, n] = model_output$chla # store in Y vector
+      Y[1 , t, ((n-1)*n_samples+1):(n*n_samples)] = model_output$chla # store in Y vector
+      # forcing to be positive 
+      Y[1 , t, ((n-1)*n_samples+1):(n*n_samples)] = ifelse(Y[1 , t, ((n-1)*n_samples+1):(n*n_samples)] < 0,
+                                                           0.01, 
+                                                           Y[1 , t, ((n-1)*n_samples+1):(n*n_samples)])
     }
     
     # check if there are any observations to assimilate 
@@ -362,15 +371,15 @@ forecast = function(trained_model,
                         R = R,
                         obs = obs,
                         H = H,
-                        n_en = n_en,
+                        n_en = n_en * n_samples,
                         cur_step = t) # updating params / states if obs available
     }
   }
-  
 
   forecasted_dates <- unique(forecasted_drivers_df$time)
   out <- expand_grid(time = forecasted_dates, 
-                     ensemble = 1:31) %>% 
+                     ensemble = 1:31, 
+                     sample = 1:n_samples) %>% 
     mutate(chla = NA,
            site_id = site) 
   # store today's day 0 prediction in out
@@ -398,16 +407,24 @@ forecast = function(trained_model,
                               ensemble == ens_driver) %>% 
         pull(chla) 
       
+      cur_drivers$chla_lagged_1 = mean(chla_lagged_1, na.rm = T) 
+      
       # run model; 
       model_output <- predict_chla(trained_model = trained_model,
-                                   chla_lagged_1 = chla_lagged_1,
-                                   air_temp = cur_drivers$air_temperature,
-                                   rh = cur_drivers$relative_humidity, 
-                                   swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
-                                   precip = cur_drivers$precipitation_flux)
-      
+                                   data = cur_drivers,
+                                   n_samples = n_samples)
+      # # run model; 
+      # model_output <- predict_chla(trained_model = trained_model,
+      #                              chla_lagged_1 = chla_lagged_1,
+      #                              air_temp = cur_drivers$air_temperature,
+      #                              rh = cur_drivers$relative_humidity, 
+      #                              swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
+      #                              precip = cur_drivers$precipitation_flux)
+       
       out$chla[out$time == forecasted_dates[t] & out$ensemble == ens_driver] = model_output$chla 
       # Y_forecast[1, 1, t, n] = model_output$chla # store in Y vector
+      # forcing to be positive 
+      out$chla = ifelse(out$chla < 0, 0.01, out$chla)
     }
   }
    

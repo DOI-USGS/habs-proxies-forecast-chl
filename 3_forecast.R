@@ -4,6 +4,7 @@ source("2_model/src/chla_models.R")
 
 # packages needed for these targets
 tar_option_set(packages = c(
+  "randomForest", 
   "tsibble")
 )
 
@@ -26,7 +27,7 @@ p3_targets_list = list(
   
   tar_target(
     p3_start_forecast, 
-    p1_forecast_issue_date - 40
+    p1_forecast_issue_date - 5
   ),
   
   tar_target(
@@ -35,10 +36,16 @@ p3_targets_list = list(
   ),
   
   tar_target(
+    p3_n_samples,
+    100
+  ),
+  
+  tar_target(
     # produce forecast for each site 
     p3_forecast_csv,
     forecast(trained_model = p2_train_model,
              n_en = p3_n_en,  
+             n_samples = p3_n_samples, 
              start = p3_start_forecast,
              stop = p1_forecast_issue_date, 
              f_horizon = 35, # days  
@@ -64,6 +71,7 @@ p3_targets_list = list(
     # combine forecasts from all sites 
     p3_all_forecasts_csv,
     {
+      why = 1
       out_file <- paste0("3_forecast/out/aquatics", "-", 
                          p1_forecast_issue_date ,"-", 
                          p0_team_name, ".csv")

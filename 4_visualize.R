@@ -3,7 +3,9 @@ source("4_visualize/src/visualize_forecast.R")
 
 # packages needed for these targets
 tar_option_set(packages = c(
-  "ggplot2")
+  "ggdist", 
+  "ggplot2",
+  "scico")
 )
 
 # target list
