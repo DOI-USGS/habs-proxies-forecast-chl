@@ -20,7 +20,8 @@ visualize_forecast <- function(forecast_file,
   # Breaks by 5, then associated with the data for dynamic coloring of text/ticks
   breaks_all <- seq(0,100, by = 5)
   breaks_draw <- breaks_all[breaks_all >= min(forecasts$chla, na.rm = T)]
-  # copied from https://github.com/USGS-VIZLAB/forecast-drb/blob/bf40ad748814298878c76eaa793cd1e68e2f62a4/3_visualize/src/plot_interval.R
+  # forecast plot code copied from
+  #  https://github.com/USGS-VIZLAB/forecast-drb/blob/bf40ad748814298878c76eaa793cd1e68e2f62a4/3_visualize/src/plot_interval.R
   browser() 
   # plot 1-day out predictions with mean prediction
   plot <- forecasts %>%
