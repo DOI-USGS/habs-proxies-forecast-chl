@@ -16,8 +16,9 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    as.Date("2022-08-01"),
+    # as.Date("2022-06-28"),
     # Sys.Date(),
+    as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
     cue = tar_cue(mode = "always")
   ),
   
@@ -100,8 +101,8 @@ p1_targets_list = list(
       "surface_downwelling_longwave_flux_in_air",
       "surface_downwelling_shortwave_flux_in_air",
       "precipitation_flux",
-      "specific_humidity",
-      "wind_speed")
+      "eastward_wind", 
+      "northward_wind")
   ),
   
   # current drivers are in 1 hour intervals and we want to summarize to daily means 
