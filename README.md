@@ -1,5 +1,5 @@
 # habs-proxies-forecast-chl
-Collection of code from the HABs Proxies group to forecast chl-a for [Ecological Forecasting Challenge 2022](https://projects.ecoforecast.org/neon4cast-docs/theme-aquatic-ecosystems.html).
+Collection of code from the HABs Proxies group to forecast chl-a for [Ecological Forecasting Challenge 2022](https://projects.ecoforecast.org/neon4cast-docs/Aquatics.html).
 
 ## How to work in this repository 
 NOTE: A lot of the details on standardized environment and automation come from https://github.com/eco4cast/neon4cast-example 
