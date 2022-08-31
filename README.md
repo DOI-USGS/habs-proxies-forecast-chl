@@ -14,7 +14,7 @@ NOTE: A lot of the details on standardized environment and automation come from 
 ### Ready to submit a forecast automatically?
 
 1) Uncomment the `p6_submit` target. 
-2) Uncomment the `schedule:` and `- cron: "0 20 * * *"` lines in the `.github/workflow/do_prediction.yml` file. This cron job will run the forecast in this repository daily at 20:00 UTC, and the execution of the forecast occurs on GitHub's servers, so your local computer does not need to be turned on. You can update this to run on a different schedule based on timing codes found in https://crontab.guru
+2) Uncomment the `schedule:` and `- cron: "0 20 * * *"` lines in the `.github/workflows/do_prediction.yml` file. This cron job will run the forecast in this repository daily at 20:00 UTC, and the execution of the forecast occurs on GitHub's servers, so your local computer does not need to be turned on. You can update this to run on a different schedule based on timing codes found in https://crontab.guru
 3) Commit and push the changes to Github. 
 
 ### Running the pipeline in GitHub actions manually 
