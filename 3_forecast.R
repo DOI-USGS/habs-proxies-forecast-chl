@@ -27,7 +27,7 @@ p3_targets_list = list(
   
   tar_target(
     p3_start_forecast, 
-    p1_forecast_issue_date - 10
+    p1_forecast_issue_date - 20
   ),
   
   tar_target(
