@@ -3,32 +3,32 @@
 visualize_forecast <- function(forecast_file, 
                                obs, 
                                out_file){
-   
+  
   obs <- filter(obs, 
-                variable == "chla") %>% 
-    pivot_wider(names_from = variable, values_from = observed) %>% 
-    rename(obs_chla = chla)
+                variable == "chla") # %>% 
+    # pivot_wider(names_from = variable, values_from = observed) %>% 
+    # rename(obs_chla = chla)
   
   forecasts <- read_csv(forecast_file) %>% 
-    left_join(obs, by = c("time", "site_id"))
+    left_join(obs, by = c("time", "site_id", "variable")) %>% as_tibble()
   
   obs <- filter(obs, time >= min(forecasts$time), 
-                time <= max(forecasts$time))
+                time <= max(forecasts$time)) %>% as_tibble()
   
   show_all_predicted = TRUE 
   
   # Breaks by 5, then associated with the data for dynamic coloring of text/ticks
   breaks_all <- seq(0,100, by = 5)
-  breaks_draw <- breaks_all[breaks_all >= min(forecasts$chla, na.rm = T)]
+  breaks_draw <- breaks_all[breaks_all >= min(forecasts$predicted, na.rm = T)]
   # forecast plot code copied from
   #  https://github.com/USGS-VIZLAB/forecast-drb/blob/bf40ad748814298878c76eaa793cd1e68e2f62a4/3_visualize/src/plot_interval.R
-  browser() 
+   
   # plot 1-day out predictions with mean prediction
   plot <- forecasts %>%
     ggplot(
       aes(
         x = time,
-        y = chla,
+        y = predicted,
         group = site_id
       )) +
     labs(x = " ",
@@ -91,7 +91,7 @@ visualize_forecast <- function(forecast_file,
           panel.spacing = unit(0,"lines"))+
     scale_x_date(breaks = scales::breaks_width("5 day"),
                  labels = scales::label_date_short()) + 
-    geom_point(data = obs, aes(x = time, y = obs_chla), color = "red") 
+    geom_point(data = obs, aes(x = time, y = observed), color = "red") 
 
 
   ggsave(filename = out_file, plot = plot, bg = "white", 

@@ -16,9 +16,9 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    # as.Date("2022-06-28"),
-    # Sys.Date(),
-    as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
+    # as.Date("2022-09-01"),
+    Sys.Date(), # met forecasts aren't available until the next day 
+    # as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
     cue = tar_cue(mode = "always")
   ),
   
@@ -64,7 +64,8 @@ p1_targets_list = list(
         saveRDS(file = out_file) 
       
       return(out_file) 
-    }
+    },
+    cue = tar_cue("always")
   ),
 
   
@@ -76,14 +77,14 @@ p1_targets_list = list(
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
 
       out_file = "1_data/out/forecasted_gefs.rds"
-      
+       
       # connect to db 
       forecasted_gefs <- neon4cast::noaa_stage2()
-      
+      date_to_download <- p1_forecast_issue_date - 1
       # filter to sites we want and then pull down to local tibble 
       forecasted_gefs %>% 
         dplyr::filter(site_id %in% p0_forecast_site_ids,
-                      start_date == as.character(p1_forecast_issue_date)) %>% 
+                      start_date == as.character(date_to_download)) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
       

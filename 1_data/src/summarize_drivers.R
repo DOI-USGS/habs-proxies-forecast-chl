@@ -9,14 +9,16 @@ summarize_drivers <- function(
 {
    
   data <- readRDS(in_file) 
-   
+  
   if(group_by_ens){
     summarized_data <- data %>% 
       # time offset is about 5 hours  
       mutate(time = time - (5 * 3600),
              time = as_date(time)) %>% 
       group_by(site_id, time, ensemble, variable) %>% 
-      summarise(predicted = mean(predicted, na.rm = T), 
+      summarise(predicted_mean = mean(predicted, na.rm = T), 
+                predicted_max = max(predicted, na.rm = T), 
+                predicted_min = min(predicted, na.rm = T), 
                 .groups = "drop") 
   }else{
     summarized_data <- data %>% 
@@ -24,7 +26,9 @@ summarize_drivers <- function(
       mutate(time = time - (5 * 3600),
              time = as_date(time)) %>% 
       group_by(site_id, time, variable) %>% 
-      summarise(predicted = mean(predicted, na.rm = T), 
+      summarise(predicted_mean = mean(predicted, na.rm = T), 
+                predicted_max = max(predicted, na.rm = T), 
+                predicted_min = min(predicted, na.rm = T), 
                 .groups = "drop") 
   }
   
