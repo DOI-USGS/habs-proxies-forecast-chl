@@ -7,6 +7,7 @@ train_model <- function(driver_file,
                         target_vars,
                         site, 
                         out_file){
+  
   target <- filter(target_file, 
                    site_id == site,
                    variable == target_vars) %>% 
@@ -17,15 +18,25 @@ train_model <- function(driver_file,
            variable %in% driver_vars) %>% 
     # taking mean of ensemble members 
     group_by(time, variable) %>% 
-    summarise(predicted = mean(predicted, na.rm = T), 
+    summarise(predicted_mean = mean(predicted_mean, na.rm = T), 
+              predicted_max = mean(predicted_max, na.rm = T), 
+              predicted_min = mean(predicted_min, na.rm = T), 
               .groups = "drop") %>% 
-    pivot_wider(names_from = variable, values_from = predicted) 
+    pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) 
+    # mutate(accumulated_precipitation_flux = zoo::rollsum(predicted_mean_precipitation_flux, k = 3, fill = NA, align = "right"))
   
+  driver_vars <- lapply(c("predicted_mean", "predicted_max", "predicted_min"), 
+                        function(x){paste(x, driver_vars, sep = "_")}) %>% unlist()
+                   # "accumulated_precipitation_flux") 
+   
   all_data <- left_join(target, drivers, by = "time") %>% 
     filter_at(driver_vars, all_vars(!is.na(.))) %>% 
     mutate(chla_lagged_1 = dplyr::lag(chla, n = 1)) %>% 
-    slice(2:n()) 
-   
+    slice(2:n())#  %>% 
+    # rowwise() %>% 
+    # mutate(cumulative_precip = )
+  
+
   # model <- lm(chla ~ chla_lagged_1 + 
   #               air_temperature + 
   #               relative_humidity + 
@@ -33,20 +44,27 @@ train_model <- function(driver_file,
   #               precipitation_flux, 
   #             data = all_data) 
   # summary(model)
+  model_data <- as_tibble(all_data) %>% 
+    mutate(doy = lubridate::yday(time)) %>% 
+    select(-c(time, site_id)) 
   
-  model = randomForest::randomForest(chla ~ chla_lagged_1 + 
-                                       air_temperature + 
-                                       air_pressure + 
-                                       relative_humidity + 
-                                       surface_downwelling_longwave_flux_in_air + 
-                                       surface_downwelling_shortwave_flux_in_air + 
-                                       precipitation_flux + 
-                                       eastward_wind +  
-                                       northward_wind,
-                                     data = all_data, na.action = na.omit,
+  model_data <- na.omit(model_data)
+  
+   
+  tune = randomForest::tuneRF(x = select(model_data, -chla),
+                              y = model_data$chla, 
+                              stepFactor = 1.5,
+                              improve = 0.01,
+                              ntreeTry = 1000)
+  
+  model = randomForest::randomForest(chla ~ .,
+                                     data = model_data,
+                                     na.action = na.omit, 
+                                     mtry = tune[which(min(tune[,2]) == tune[,2]),1], 
+                                     importance = T, 
                                      ntree = 1000)
-  
-  # preds = predict(model, all_data, predict.all = T) 
+   
+  # preds = predict(model, model_data, predict.all = T)
   # 
   # pred.rf.int2 <- sapply(1:length(preds$aggregate), function(i) {
   #   tmp <- preds$individual[i, ] + rnorm(1000, 0, sqrt(model$mse))

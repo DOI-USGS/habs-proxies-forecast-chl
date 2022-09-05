@@ -266,15 +266,20 @@ forecast = function(trained_model,
   obs_df = filter(all_obs_df,
                   time >= start) 
   
+  driver_vars <- lapply(c("predicted_mean", "predicted_max", "predicted_min"), 
+                        function(x){paste(x, driver_vars, sep = "_")}) %>% unlist()
+  
   historic_drivers_df = readRDS(historic_driver_file) %>% 
     filter(site_id == site) %>% 
-    pivot_wider(names_from = variable, values_from = predicted) %>% 
-    select(time, ensemble, all_of(driver_vars))
+    pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
+    select(time, ensemble, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(time))
   
   forecasted_drivers_df = readRDS(forecasted_driver_file) %>% 
     filter(site_id == site, time >= stop) %>% 
-    pivot_wider(names_from = variable, values_from = predicted) %>% 
-    select(time, ensemble, all_of(driver_vars))
+    pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
+    select(time, ensemble, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(time))
 
   n_states_est <- n_states_est # number of states we're estimating 
   
@@ -385,7 +390,7 @@ forecast = function(trained_model,
   # store today's day 0 prediction in out
   out$chla[out$time == forecasted_dates[1]] = Y[1,n_step,]
   
-  for(t in 2:f_horizon){
+  for(t in 2:(f_horizon-1)){
     print(sprintf("starting %s", forecasted_dates[t]))
     if(t < 17){
       # 31 ensembles for first 16 days 
@@ -428,7 +433,13 @@ forecast = function(trained_model,
     }
   }
    
-
+  out <- out %>% 
+    group_by(time) %>% 
+    mutate(ensemble = 1:n()) %>% 
+    ungroup() %>% select(-sample) %>% 
+    mutate(start_time = stop) %>% 
+    pivot_longer(chla, names_to = "variable", values_to = "predicted")
+  
   write_csv(x = out, file = out_file)
   return(out_file) 
 }

@@ -27,7 +27,7 @@ p3_targets_list = list(
   
   tar_target(
     p3_start_forecast, 
-    p1_forecast_issue_date - 5
+    p1_forecast_issue_date - 10
   ),
   
   tar_target(
@@ -71,7 +71,6 @@ p3_targets_list = list(
     # combine forecasts from all sites 
     p3_all_forecasts_csv,
     {
-      why = 1
       out_file <- paste0("3_forecast/out/aquatics", "-", 
                          p1_forecast_issue_date ,"-", 
                          p0_team_name, ".csv")

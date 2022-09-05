@@ -13,7 +13,7 @@ p2_targets_list = list(
   tar_target(
     # model to train and use for forecast 
     p2_model_type,
-    "linear"
+    "random_forest"
   ),
   
   tar_target(
