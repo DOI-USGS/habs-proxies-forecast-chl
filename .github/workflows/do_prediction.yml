@@ -28,6 +28,7 @@ jobs:
           
       - name: Install and activate renv
         run: |
+          Sys.setenv(ARROW_S3 = "ON")
           install.packages("renv")
           renv::activate()
           renv::restore() 
