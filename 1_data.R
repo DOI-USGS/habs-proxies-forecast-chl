@@ -125,12 +125,4 @@ p1_targets_list = list(
     cue = tar_cue(mode = "always")
   )
   
-  # tar_target(
-  #   p1_historic_nwm_rds, 
-  #   download_nwm(sites = p0_site_metadata,
-  #                start_date = "2018-01-01",
-  #                end_date = p1_forecast_issue_date,
-  #                out_file = "1_data/out/historic_nwm.rds") 
-  # )
-  
 )
