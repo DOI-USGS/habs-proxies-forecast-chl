@@ -26,8 +26,9 @@ p1_targets_list = list(
   tar_target(
     p1_aquatic_targets,
     aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
-      dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
-      as_tsibble(index = time, key = c(site_id,variable)),
+      dplyr::filter(site_id %in% p0_forecast_site_ids) %>%  
+      as_tsibble(index = datetime, key = c(site_id, variable)) %>% 
+      rename(time = datetime),
     cue = tar_cue(mode = "always")
   ),
   
@@ -123,13 +124,5 @@ p1_targets_list = list(
                       out_file = "1_data/out/forecasted_gefs_daily.rds"),
     cue = tar_cue(mode = "always")
   )
-  
-  # tar_target(
-  #   p1_historic_nwm_rds, 
-  #   download_nwm(sites = p0_site_metadata,
-  #                start_date = "2018-01-01",
-  #                end_date = p1_forecast_issue_date,
-  #                out_file = "1_data/out/historic_nwm.rds") 
-  # )
   
 )

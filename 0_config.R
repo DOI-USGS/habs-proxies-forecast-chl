@@ -55,10 +55,6 @@ p0_targets_list = list(
   tar_target(
     p0_site_metadata,
     read_csv("https://raw.githubusercontent.com/eco4cast/neon4cast-targets/main/NEON_Field_Site_Metadata_20220412.csv") %>% 
-      filter(field_site_id %in% p0_forecast_site_ids) %>% 
-      rowwise() %>% 
-      mutate(COMID = comid_from_point(field_latitude, field_longitude),
-             tz = get_tz(field_latitude, field_longitude)) %>% 
-      ungroup() 
+      filter(field_site_id %in% p0_forecast_site_ids)
   )
 )
