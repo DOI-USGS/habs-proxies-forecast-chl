@@ -65,7 +65,7 @@ p1_targets_list = list(
        
       return(out_file) 
     },
-    #cue = tar_cue("always")
+    cue = tar_cue("always")
   ),
 
   
@@ -90,7 +90,7 @@ p1_targets_list = list(
       
       return(out_file) 
     },
-    #cue = tar_cue(mode = "always")
+    cue = tar_cue(mode = "always")
   ), 
   
   tar_target(
@@ -113,7 +113,7 @@ p1_targets_list = list(
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
                       out_file = "1_data/out/historic_gefs_daily.rds"),
-    #cue = tar_cue(mode = "always")
+    cue = tar_cue(mode = "always")
   ),
   tar_target(
     p1_forecasted_gefs_daily_rds,
@@ -121,7 +121,7 @@ p1_targets_list = list(
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
                       out_file = "1_data/out/forecasted_gefs_daily.rds"),
-    #cue = tar_cue(mode = "always")
+    cue = tar_cue(mode = "always")
   )
   
 )
