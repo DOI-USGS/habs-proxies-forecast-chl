@@ -27,8 +27,7 @@ p1_targets_list = list(
     p1_aquatic_targets,
     aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
       dplyr::filter(site_id %in% p0_forecast_site_ids) %>%  
-      as_tsibble(index = datetime, key = c(site_id, variable)) %>% 
-      rename(time = datetime),
+      as_tsibble(index = datetime, key = c(site_id, variable)),
     cue = tar_cue(mode = "always")
   ),
   
@@ -63,7 +62,7 @@ p1_targets_list = list(
         dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
-      
+       
       return(out_file) 
     },
     cue = tar_cue("always")

@@ -10,10 +10,10 @@ visualize_forecast <- function(forecast_file,
     # rename(obs_chla = chla)
   
   forecasts <- read_csv(forecast_file) %>% 
-    left_join(obs, by = c("time", "site_id", "variable")) %>% as_tibble()
+    left_join(obs, by = c("datetime", "site_id", "variable")) %>% as_tibble()
   
-  obs <- filter(obs, time >= min(forecasts$time), 
-                time <= max(forecasts$time)) %>% as_tibble()
+  obs <- filter(obs, datetime >= min(forecasts$datetime), 
+                datetime <= max(forecasts$datetime)) %>% as_tibble()
   
   show_all_predicted = TRUE 
   
@@ -27,7 +27,7 @@ visualize_forecast <- function(forecast_file,
   plot <- forecasts %>%
     ggplot(
       aes(
-        x = time,
+        x = datetime,
         y = predicted,
         group = site_id
       )) +
@@ -91,7 +91,7 @@ visualize_forecast <- function(forecast_file,
           panel.spacing = unit(0,"lines"))+
     scale_x_date(breaks = scales::breaks_width("5 day"),
                  labels = scales::label_date_short()) + 
-    geom_point(data = obs, aes(x = time, y = observed), color = "red") 
+    geom_point(data = obs, aes(x = datetime, y = observed), color = "red") 
 
 
   ggsave(filename = out_file, plot = plot, bg = "white", 

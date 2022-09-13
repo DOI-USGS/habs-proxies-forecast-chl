@@ -664,6 +664,28 @@
       "Hash": "699a7a93d08c962d9f8950b2d7a227f1",
       "Requirements": []
     },
+    "fabletools": {
+      "Package": "fabletools",
+      "Version": "0.3.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c63fb3d5a3377aec8e4cfa56b94f3d8d",
+      "Requirements": [
+        "R6",
+        "distributional",
+        "dplyr",
+        "generics",
+        "ggplot2",
+        "lifecycle",
+        "progressr",
+        "rlang",
+        "tibble",
+        "tidyr",
+        "tidyselect",
+        "tsibble",
+        "vctrs"
+      ]
+    },
     "fansi": {
       "Package": "fansi",
       "Version": "1.0.3",
@@ -1210,8 +1232,8 @@
       "RemoteRepo": "neon4cast",
       "RemoteUsername": "eco4cast",
       "RemoteRef": "HEAD",
-      "RemoteSha": "628da6d62fb3c04ba38933946c97a65757657ace",
-      "Hash": "37f89b677473f69a6ce8ff53da7b190d",
+      "RemoteSha": "cb2b7944b2e4bacb0db2a9a6954443a5dced52c4",
+      "Hash": "b7f0dffb1ff86e89f52c582215786038",
       "Requirements": [
         "EML",
         "ISOweek",
@@ -1399,6 +1421,16 @@
         "prettyunits"
       ]
     },
+    "progressr": {
+      "Package": "progressr",
+      "Version": "0.11.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2d004de7f34cd30956e95265f56a8bb6",
+      "Requirements": [
+        "digest"
+      ]
+    },
     "proxy": {
       "Package": "proxy",
       "Version": "0.4-27",
@@ -1451,8 +1483,8 @@
       "RemoteRepo": "read4cast",
       "RemoteUsername": "eco4cast",
       "RemoteRef": "HEAD",
-      "RemoteSha": "223b05de95c7444e965de607186b01b27089c324",
-      "Hash": "3f9907d0ad5070388537fad40f101156",
+      "RemoteSha": "d991fa7831872836ad083752631e5902770f8eb2",
+      "Hash": "d653f286323a0ebc7cf80e5160f9d1b4",
       "Requirements": [
         "dplyr",
         "lubridate",
@@ -1696,14 +1728,18 @@
       "RemoteRepo": "score4cast",
       "RemoteUsername": "eco4cast",
       "RemoteRef": "HEAD",
-      "RemoteSha": "7f6ad3a53beee0b7420fb8736dafbbbe44266df1",
-      "Hash": "eaaa8c7408c87acb567a8a249709457e",
+      "RemoteSha": "bc78da709ab4cad533e2fbd2abcd09106e74a47f",
+      "Hash": "a1c7d3e030663317f5ce8cbf7448ed0c",
       "Requirements": [
         "ISOweek",
         "arrow",
+        "distributional",
         "dplyr",
+        "fabletools",
+        "forcats",
         "read4cast",
         "readr",
+        "rlang",
         "scoringRules",
         "tidyr"
       ]
