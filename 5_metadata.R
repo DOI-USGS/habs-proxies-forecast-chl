@@ -1,4 +1,5 @@
 # sourcing functions
+source("5_metadata/src/metadata_utils.R")
 
 # packages needed for these targets
 tar_option_set(packages = c(
@@ -35,11 +36,26 @@ p5_targets_list = list(
   ),
   
   tar_target(
+    p5_forecast_attributes,
+    tibble::tribble(
+      ~attributeName, ~attributeDefinition, ~unit, ~formatString, ~definition, ~numberType,
+      "reference_datetime", "[dimension]{reference time}", "year", "YYYY-MM-DD", "reference time of forecast", "datetime", 
+      "datetime", "[dimension]{time}", "year", "YYYY-MM-DD", "valid time of forecast", "datetime",
+      "site_id", "[dimension]{neon site}", "dimensionless", NA, "NEON site ID", "character", 
+      "family", "[dimension]{name of probability distribution}", "dimensionless", NA, "name of probability distribution that is described by the parameter values in the parameter dimension", "character", 
+      "parameter", "[dimension]{index of ensemble member}", "dimensionless", NA, NA, "integer",   
+      "variable", "[dimension]{variable being predicted}", "dimensionless", NA, "standard name of variable in aquatic theme challenge", "character", 
+      "predicted", "[variable]{predicted value}", "microgramsPerLiter", NA, "predicted value for parameter in parameter column", "real"
+    )
+  ),
+  
+  tar_target(
     p5_metadata_to_submit_xml,
-    neon4cast::generate_metadata(forecast_file = p3_all_forecasts_csv,
-                                 team_list = p0_team_list,
-                                 model_metadata =  p5_model_metadata,
-                                 forecast_issue_time = p1_forecast_issue_date),
+    generate_chla_metadata(forecast_file = p3_all_forecasts_csv,
+                           team_list = p0_team_list,
+                           model_metadata =  p5_model_metadata,
+                           forecast_issue_time = p1_forecast_issue_date,
+                           attributes = p5_forecast_attributes),
   ),
   
   tar_target(
