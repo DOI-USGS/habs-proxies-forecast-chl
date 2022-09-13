@@ -27,8 +27,7 @@ p1_targets_list = list(
     p1_aquatic_targets,
     aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
       dplyr::filter(site_id %in% p0_forecast_site_ids) %>%  
-      as_tsibble(index = datetime, key = c(site_id, variable)) %>% 
-      rename(time = datetime),
+      as_tsibble(index = datetime, key = c(site_id, variable)),
     cue = tar_cue(mode = "always")
   ),
   
@@ -63,10 +62,10 @@ p1_targets_list = list(
         dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
-      
+       
       return(out_file) 
     },
-    cue = tar_cue("always")
+    #cue = tar_cue("always")
   ),
 
   
@@ -91,7 +90,7 @@ p1_targets_list = list(
       
       return(out_file) 
     },
-    cue = tar_cue(mode = "always")
+    #cue = tar_cue(mode = "always")
   ), 
   
   tar_target(
@@ -114,7 +113,7 @@ p1_targets_list = list(
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
                       out_file = "1_data/out/historic_gefs_daily.rds"),
-    cue = tar_cue(mode = "always")
+    #cue = tar_cue(mode = "always")
   ),
   tar_target(
     p1_forecasted_gefs_daily_rds,
@@ -122,7 +121,7 @@ p1_targets_list = list(
                       vars = p1_met_drivers, 
                       group_by_ens = TRUE, 
                       out_file = "1_data/out/forecasted_gefs_daily.rds"),
-    cue = tar_cue(mode = "always")
+    #cue = tar_cue(mode = "always")
   )
   
 )
