@@ -16,7 +16,7 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    # as.Date("2022-09-01"),
+    # as.Date("2022-09-15"),
     Sys.Date(), # met forecasts aren't available until the next day 
     # as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
     cue = tar_cue(mode = "always")
@@ -27,6 +27,7 @@ p1_targets_list = list(
     p1_aquatic_targets,
     aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
       dplyr::filter(site_id %in% p0_forecast_site_ids) %>%  
+      distinct() %>% 
       as_tsibble(index = datetime, key = c(site_id, variable)),
     cue = tar_cue(mode = "always")
   ),
