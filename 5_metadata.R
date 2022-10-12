@@ -45,7 +45,7 @@ p5_targets_list = list(
       "family", "[dimension]{name of probability distribution}", "dimensionless", NA, "name of probability distribution that is described by the parameter values in the parameter dimension", "character", 
       "parameter", "[dimension]{index of ensemble member}", "dimensionless", NA, NA, "integer",   
       "variable", "[dimension]{variable being predicted}", "dimensionless", NA, "standard name of variable in aquatic theme challenge", "character", 
-      "predicted", "[variable]{predicted value}", "microgramsPerLiter", NA, "predicted value for parameter in parameter column", "real"
+      "prediction", "[variable]{prediction value}", "microgramsPerLiter", NA, "prediction value for parameter in parameter column", "real"
     )
   ),
   

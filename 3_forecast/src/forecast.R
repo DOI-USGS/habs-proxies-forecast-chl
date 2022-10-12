@@ -272,16 +272,14 @@ forecast = function(trained_model,
   historic_drivers_df = readRDS(historic_driver_file) %>% 
     filter(site_id == site) %>% 
     pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
-    select(time, ensemble, all_of(driver_vars)) %>% 
-    mutate(doy = lubridate::yday(time)) %>% 
-    rename(datetime = time) 
+    select(datetime, parameter, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(datetime))
   
   forecasted_drivers_df = readRDS(forecasted_driver_file) %>% 
-    filter(site_id == site, time >= stop) %>% 
+    filter(site_id == site, datetime >= stop) %>% 
     pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
-    select(time, ensemble, all_of(driver_vars)) %>% 
-    mutate(doy = lubridate::yday(time)) %>% 
-    rename(datetime = time) 
+    select(datetime, parameter, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(datetime)) 
 
   n_states_est <- n_states_est # number of states we're estimating 
   
@@ -345,11 +343,11 @@ forecast = function(trained_model,
       if(t < n_step){
         cur_drivers <- filter(historic_drivers_df, 
                               datetime == dates[t],
-                              ensemble == n)
+                              parameter == n)
       }else{
         cur_drivers <- filter(forecasted_drivers_df, 
                               datetime == dates[t],
-                              ensemble == n)
+                              parameter == n)
       }
        
       cur_drivers$chla_lagged_1 = mean(Y[1, t-1, ((n-1)*n_samples+1):(n*n_samples)], na.rm = T)
@@ -391,7 +389,7 @@ forecast = function(trained_model,
            site_id = site) 
   # store today's day 0 prediction in out
   out$chla[out$datetime == forecasted_dates[1]] = Y[1,n_step,]
-  
+   
   for(t in 2:(f_horizon-1)){
     print(sprintf("starting %s", forecasted_dates[t]))
     # if(t < 17){
@@ -409,7 +407,7 @@ forecast = function(trained_model,
       }else{ens_driver = ifelse(n <= 8, n, sample(1:8, 1))}
       cur_drivers <- filter(forecasted_drivers_df, 
                             datetime == forecasted_dates[t],
-                            ensemble == ens_driver)
+                            parameter == ens_driver)
       chla_lagged_1 <- filter(out, 
                               datetime == forecasted_dates[t-1],
                               ensemble == ens_driver) %>% 
@@ -442,7 +440,7 @@ forecast = function(trained_model,
            family = "ensemble") %>% 
     ungroup() %>% select(-sample, -ensemble) %>% 
     mutate(reference_datetime = stop) %>% 
-    pivot_longer(chla, names_to = "variable", values_to = "predicted") %>%
+    pivot_longer(chla, names_to = "variable", values_to = "prediction") %>%
     relocate(reference_datetime, datetime, site_id, family, parameter)
   
   write_csv(x = out, file = out_file)

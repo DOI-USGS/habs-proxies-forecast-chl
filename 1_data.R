@@ -82,10 +82,11 @@ p1_targets_list = list(
       # connect to db 
       forecasted_gefs <- neon4cast::noaa_stage2()
       date_to_download <- p1_forecast_issue_date - 1
+      browser() 
       # filter to sites we want and then pull down to local tibble 
       forecasted_gefs %>% 
         dplyr::filter(site_id %in% p0_forecast_site_ids,
-                      start_date == as.character(date_to_download)) %>% 
+                      reference_datetime == lubridate::as_datetime(date_to_download)) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
       

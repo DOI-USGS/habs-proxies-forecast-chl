@@ -17,13 +17,12 @@ train_model <- function(driver_file,
     filter(site_id == site,
            variable %in% driver_vars) %>% 
     # taking mean of ensemble members 
-    group_by(time, variable) %>% 
+    group_by(datetime, variable) %>% 
     summarise(predicted_mean = mean(predicted_mean, na.rm = T), 
               predicted_max = mean(predicted_max, na.rm = T), 
               predicted_min = mean(predicted_min, na.rm = T), 
               .groups = "drop") %>% 
-    pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
-    rename(datetime = time) 
+    pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) 
     # mutate(accumulated_precipitation_flux = zoo::rollsum(predicted_mean_precipitation_flux, k = 3, fill = NA, align = "right"))
   
   driver_vars <- lapply(c("predicted_mean", "predicted_max", "predicted_min"), 
