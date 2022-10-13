@@ -11,7 +11,8 @@ train_model <- function(driver_file,
   target <- filter(target_file, 
                    site_id == site,
                    variable == target_vars) %>% 
-    pivot_wider(names_from = variable, values_from = observed)
+    select(-observed) %>% 
+    pivot_wider(names_from = variable, values_from = observation)
    
   drivers <- readRDS(driver_file) %>% 
     filter(site_id == site,
@@ -35,7 +36,6 @@ train_model <- function(driver_file,
     slice(2:n())#  %>% 
     # rowwise() %>% 
     # mutate(cumulative_precip = )
-  
 
   # model <- lm(chla ~ chla_lagged_1 + 
   #               air_temperature + 

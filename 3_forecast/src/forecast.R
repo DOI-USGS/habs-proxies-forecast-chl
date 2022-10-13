@@ -260,7 +260,7 @@ forecast = function(trained_model,
   all_obs_df = filter(obs, 
                       site_id == site,
                       variable == "chla") %>% 
-    pivot_wider(names_from = variable, values_from = observed) %>% 
+    pivot_wider(names_from = variable, values_from = observation) %>% 
     select(datetime, chla) 
     
   obs_df = filter(all_obs_df,
