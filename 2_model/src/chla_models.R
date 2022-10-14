@@ -11,7 +11,6 @@ train_model <- function(driver_file,
   target <- filter(target_file, 
                    site_id == site,
                    variable == target_vars) %>% 
-    select(-observed) %>% 
     pivot_wider(names_from = variable, values_from = observation)
    
   drivers <- readRDS(driver_file) %>% 
