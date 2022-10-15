@@ -14,7 +14,7 @@ generate_chla_metadata <- function(
     attributes = NULL,
     forecast_issue_time = NULL
 ){
-  browser() 
+   
   forecast_file_name_base <- tools::file_path_sans_ext(tools::file_path_sans_ext(basename(forecast_file)))
   forecast <- read4cast::read_forecast(file_in = forecast_file)
   theme <- unlist(stringr::str_split(stringr::str_split(forecast_file_name_base, 
@@ -66,7 +66,7 @@ generate_chla_metadata <- function(
                                   entityDescription = entityDescription_text, physical = physical, 
                                   attributeList = attrList)
   sites <- unique(forecast$site_id)
-  geographicCoverage <- neon4cast:::neon_geographic_coverage(sites)
+  geographicCoverage <- readRDS("5_metadata/in/geog_cov.rds") # neon4cast:::neon_geographic_coverage(sites)
   start_date <- lubridate::as_date(min(forecast$datetime))
   stop_date <- lubridate::as_date(max(forecast$datetime))
   temporalCoverage <- list(rangeOfDates = list(beginDate = list(calendarDate = start_date), 
