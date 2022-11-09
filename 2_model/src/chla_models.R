@@ -48,8 +48,7 @@ train_model <- function(driver_file,
     select(-c(datetime, site_id)) 
   
   model_data <- na.omit(model_data)
-  
-   
+
   tune = randomForest::tuneRF(x = select(model_data, -chla),
                               y = model_data$chla, 
                               stepFactor = 1.5,

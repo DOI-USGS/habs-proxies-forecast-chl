@@ -12,6 +12,8 @@ summarize_drivers <- function(
   
   if(group_by_ens){
     summarized_data <- data %>% 
+      # there are some dates that have 62 ensembles for some reason; so filter to 31 ensembles here 
+      filter(parameter <= 31) %>% 
       # time offset is about 5 hours  
       mutate(datetime = datetime - (5 * 3600),
              datetime = as_date(datetime)) %>% 
@@ -22,6 +24,8 @@ summarize_drivers <- function(
                 .groups = "drop") 
   }else{
     summarized_data <- data %>% 
+      # there are some dates that have 62 ensembles for some reason; so filter to 31 ensembles here 
+      filter(parameter <= 31) %>% 
       # time offset is about 5 hours  
       mutate(datetime = datetime - (5 * 3600),
              datetime = as_date(datetime)) %>% 
