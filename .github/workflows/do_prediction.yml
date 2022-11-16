@@ -13,7 +13,7 @@ jobs:
     #  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -37,8 +37,8 @@ jobs:
       - name: Get R and OS version
         id: get-version
         run: |
-          cat("##[set-output name=os-version;]", sessionInfo()$running, "\n", sep = "")
-          cat("##[set-output name=r-version;]", R.Version()$version.string, sep = "")
+          echo "os-version=sessionInfo()$running" >> $GITHUB_OUTPUT
+          echo "r-version=R.Version()$version.string" >> $GITHUB_OUTPUT
         shell: Rscript {0}
         
       - name: Restore Renv package cache
