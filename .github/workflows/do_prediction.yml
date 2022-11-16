@@ -34,12 +34,12 @@ jobs:
           renv::restore() 
         shell: Rscript {0}
         
-      - name: Get R and OS version
-        id: get-version
-        run: |
-          echo "os-version=sessionInfo()$running" >> $GITHUB_OUTPUT
-          echo "r-version=R.Version()$version.string" >> $GITHUB_OUTPUT
-        shell: Rscript {0}
+      # - name: Get R and OS version
+      #   id: get-version
+      #   run: |
+      #     echo "os-version=sessionInfo()$running" >> $GITHUB_OUTPUT
+      #     echo "r-version=R.Version()$version.string" >> $GITHUB_OUTPUT
+      #   shell: Rscript {0}
         
       - name: Restore Renv package cache
         uses: actions/cache@v3
