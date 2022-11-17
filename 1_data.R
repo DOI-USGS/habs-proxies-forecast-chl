@@ -16,7 +16,7 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    # as.Date("2022-09-15"),
+    # as.Date("2022-05-09"),
     Sys.Date(), # met forecasts aren't available until the next day 
     # as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
     cue = tar_cue(mode = "always")
