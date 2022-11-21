@@ -54,16 +54,16 @@ p1_targets_list = list(
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
       
       out_file = "1_data/out/historic_gefs.rds"
-      
+      print(sprintf("pre-connect historic %s", Sys.time()))
       # connect to db 
       historic_gefs <- neon4cast::noaa_stage3()
-      
+      print(sprintf("post-connect historic %s", Sys.time()))
       # filter to sites we want and then pull down to local tibble 
       historic_gefs %>% 
         dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
-       
+      print(sprintf("post-download historic %s", Sys.time()))
       return(out_file) 
     },
     cue = tar_cue("always")
@@ -78,10 +78,11 @@ p1_targets_list = list(
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
 
       out_file = "1_data/out/forecasted_gefs.rds"
-       
+      print(sprintf("pre-connect forecast %s", Sys.time()))
       # connect to db 
       forecasted_gefs <- neon4cast::noaa_stage2()
       date_to_download <- p1_forecast_issue_date - 1
+      print(sprintf("post-connect forecast %s", Sys.time()))
        
       # filter to sites we want and then pull down to local tibble 
       forecasted_gefs %>% 
@@ -89,6 +90,7 @@ p1_targets_list = list(
                       reference_datetime == lubridate::as_datetime(date_to_download)) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
+      print(sprintf("post-download forecast %s", Sys.time()))
       
       return(out_file) 
     },
