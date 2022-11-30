@@ -74,7 +74,7 @@ p3_targets_list = list(
       out_file <- paste0("3_forecast/out/aquatics", "-", 
                          p1_forecast_issue_date ,"-", 
                          p0_team_name, ".csv")
-      all_forecasts <- read_csv(p3_forecast_csv) %>% bind_rows() 
+      all_forecasts <- read_csv(p3_forecast_csv) %>% bind_rows()
       write_csv(all_forecasts, out_file) 
       # validate forecast 
       neon4cast::forecast_output_validator(out_file)
