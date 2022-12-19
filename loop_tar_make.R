@@ -1,7 +1,7 @@
 library(targets)
 
-issue_dates <- as.character(seq(from = as.Date('2022-05-01'),
-                                to = as.Date('2022-08-20'),
+issue_dates <- as.character(seq(from = as.Date('2022-08-28'),
+                                to = as.Date('2022-12-06'),
                                 by = 'day'))
 
 for(date in issue_dates) {
