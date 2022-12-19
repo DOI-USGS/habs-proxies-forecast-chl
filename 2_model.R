@@ -27,7 +27,7 @@ p2_targets_list = list(
       "precipitation_flux",
       "eastward_wind", 
       "northward_wind"),
-    cue = tar_cue('always')
+    cue = tar_cue("always")
   ),
   
   tar_target(

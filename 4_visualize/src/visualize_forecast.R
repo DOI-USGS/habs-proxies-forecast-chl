@@ -3,23 +3,22 @@
 visualize_forecast <- function(forecast_file, 
                                obs, 
                                out_file){
-  
   obs <- filter(obs, 
                 variable == "chla") # %>% 
     # pivot_wider(names_from = variable, values_from = observed) %>% 
     # rename(obs_chla = chla)
   
   forecasts <- read_csv(forecast_file) %>% 
-    left_join(obs, by = c("time", "site_id", "variable")) %>% as_tibble()
+    left_join(obs, by = c("datetime", "site_id", "variable")) %>% as_tibble()
   
-  obs <- filter(obs, time >= min(forecasts$time), 
-                time <= max(forecasts$time)) %>% as_tibble()
+  obs <- filter(obs, datetime >= min(forecasts$datetime), 
+                datetime <= max(forecasts$datetime)) %>% as_tibble()
   
   show_all_predicted = TRUE 
   
   # Breaks by 5, then associated with the data for dynamic coloring of text/ticks
   breaks_all <- seq(0,100, by = 5)
-  breaks_draw <- breaks_all[breaks_all >= min(forecasts$predicted, na.rm = T)]
+  breaks_draw <- breaks_all[breaks_all >= min(forecasts$prediction, na.rm = T)]
   # forecast plot code copied from
   #  https://github.com/USGS-VIZLAB/forecast-drb/blob/bf40ad748814298878c76eaa793cd1e68e2f62a4/3_visualize/src/plot_interval.R
    
@@ -27,8 +26,8 @@ visualize_forecast <- function(forecast_file,
   plot <- forecasts %>%
     ggplot(
       aes(
-        x = time,
-        y = predicted,
+        x = datetime,
+        y = prediction,
         group = site_id
       )) +
     labs(x = " ",
@@ -75,11 +74,11 @@ visualize_forecast <- function(forecast_file,
     # }}+
     theme(legend.position = "none",
           axis.text = element_text(angle = 0, hjust = 0.5),
-          axis.text.x = element_text(size = 5),
+          axis.text.x = element_text(size = 12),
           axis.ticks.x = element_line(size = 0.3),
           strip.background = element_rect(color = NA, fill = NA),
           # color for axis labels
-          axis.text.y = element_text(size = 6,
+          axis.text.y = element_text(size = 12,
                                      color = ifelse(breaks_draw == 75, "red", "black")),
           axis.ticks.y = element_line(color = ifelse(breaks_draw == 75, "red", "black"), size = 0.3),
           panel.background = element_rect(color="grey", fill = NA),
@@ -87,11 +86,12 @@ visualize_forecast <- function(forecast_file,
           strip.text = element_text(face = "bold"),
           # panel.grid left white marks over facet borders, removed with line below
           panel.grid = element_blank(),
-          axis.title.y = element_text(size = 8),
+          axis.title.y = element_text(size = 14),
           panel.spacing = unit(0,"lines"))+
     scale_x_date(breaks = scales::breaks_width("5 day"),
                  labels = scales::label_date_short()) + 
-    geom_point(data = obs, aes(x = time, y = observed), color = "red") 
+    geom_point(data = obs, aes(x = datetime, y = observation), 
+               color = "orange", size = 2) 
 
 
   ggsave(filename = out_file, plot = plot, bg = "white", 

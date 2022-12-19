@@ -16,7 +16,7 @@ p1_targets_list = list(
   tar_target(
     # issue date of the forecast; setting to system time 
     p1_forecast_issue_date, 
-    # as.Date("2022-09-01"),
+    # as.Date("2022-05-09"),
     Sys.Date(), # met forecasts aren't available until the next day 
     # as.Date(Sys.getenv("ISSUE_TIME")), # for testing the model with loop_tar_make.R 
     cue = tar_cue(mode = "always")
@@ -27,8 +27,8 @@ p1_targets_list = list(
     p1_aquatic_targets,
     aquatic <- read_csv("https://data.ecoforecast.org/neon4cast-targets/aquatics/aquatics-targets.csv.gz") %>% 
       dplyr::filter(site_id %in% p0_forecast_site_ids) %>%  
-      as_tsibble(index = datetime, key = c(site_id, variable)) %>% 
-      rename(time = datetime),
+      distinct() %>% 
+      as_tsibble(index = datetime, key = c(site_id, variable)),
     cue = tar_cue(mode = "always")
   ),
   
@@ -54,16 +54,16 @@ p1_targets_list = list(
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
       
       out_file = "1_data/out/historic_gefs.rds"
-      
+      print(sprintf("pre-connect historic %s", Sys.time()))
       # connect to db 
       historic_gefs <- neon4cast::noaa_stage3()
-      
+      print(sprintf("post-connect historic %s", Sys.time()))
       # filter to sites we want and then pull down to local tibble 
       historic_gefs %>% 
         dplyr::filter(site_id %in% p0_forecast_site_ids) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
-      
+      print(sprintf("post-download historic %s", Sys.time()))
       return(out_file) 
     },
     cue = tar_cue("always")
@@ -78,16 +78,19 @@ p1_targets_list = list(
                  "AWS_S3_ENDPOINT" = "ecoforecast.org")
 
       out_file = "1_data/out/forecasted_gefs.rds"
-       
+      print(sprintf("pre-connect forecast %s", Sys.time()))
       # connect to db 
       forecasted_gefs <- neon4cast::noaa_stage2()
       date_to_download <- p1_forecast_issue_date - 1
+      print(sprintf("post-connect forecast %s", Sys.time()))
+       
       # filter to sites we want and then pull down to local tibble 
       forecasted_gefs %>% 
         dplyr::filter(site_id %in% p0_forecast_site_ids,
-                      start_date == as.character(date_to_download)) %>% 
+                      reference_datetime == lubridate::as_datetime(date_to_download)) %>% 
         dplyr::collect() %>% 
         saveRDS(file = out_file) 
+      print(sprintf("post-download forecast %s", Sys.time()))
       
       return(out_file) 
     },

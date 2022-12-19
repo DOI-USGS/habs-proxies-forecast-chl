@@ -7,17 +7,17 @@ train_model <- function(driver_file,
                         target_vars,
                         site, 
                         out_file){
-  
+   
   target <- filter(target_file, 
                    site_id == site,
                    variable == target_vars) %>% 
-    pivot_wider(names_from = variable, values_from = observed)
+    pivot_wider(names_from = variable, values_from = observation)
    
   drivers <- readRDS(driver_file) %>% 
     filter(site_id == site,
            variable %in% driver_vars) %>% 
     # taking mean of ensemble members 
-    group_by(time, variable) %>% 
+    group_by(datetime, variable) %>% 
     summarise(predicted_mean = mean(predicted_mean, na.rm = T), 
               predicted_max = mean(predicted_max, na.rm = T), 
               predicted_min = mean(predicted_min, na.rm = T), 
@@ -29,13 +29,12 @@ train_model <- function(driver_file,
                         function(x){paste(x, driver_vars, sep = "_")}) %>% unlist()
                    # "accumulated_precipitation_flux") 
    
-  all_data <- left_join(target, drivers, by = "time") %>% 
+  all_data <- left_join(target, drivers, by = "datetime") %>% 
     filter_at(driver_vars, all_vars(!is.na(.))) %>% 
     mutate(chla_lagged_1 = dplyr::lag(chla, n = 1)) %>% 
     slice(2:n())#  %>% 
     # rowwise() %>% 
     # mutate(cumulative_precip = )
-  
 
   # model <- lm(chla ~ chla_lagged_1 + 
   #               air_temperature + 
@@ -45,12 +44,11 @@ train_model <- function(driver_file,
   #             data = all_data) 
   # summary(model)
   model_data <- as_tibble(all_data) %>% 
-    mutate(doy = lubridate::yday(time)) %>% 
-    select(-c(time, site_id)) 
+    mutate(doy = lubridate::yday(datetime)) %>% 
+    select(-c(datetime, site_id)) 
   
   model_data <- na.omit(model_data)
-  
-   
+
   tune = randomForest::tuneRF(x = select(model_data, -chla),
                               y = model_data$chla, 
                               stepFactor = 1.5,

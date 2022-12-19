@@ -1,19 +1,19 @@
 on:
   workflow_dispatch:
-  schedule:
-  - cron: "0 20 * * *"
+  # schedule:
+  # - cron: "0 21 * * *"
 
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: rocker/geospatial
+      image: rocker/geospatial:4.2
     #env:
     #  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -34,12 +34,12 @@ jobs:
           renv::restore() 
         shell: Rscript {0}
         
-      - name: Get R and OS version
-        id: get-version
-        run: |
-          cat("##[set-output name=os-version;]", sessionInfo()$running, "\n", sep = "")
-          cat("##[set-output name=r-version;]", R.Version()$version.string, sep = "")
-        shell: Rscript {0}
+      # - name: Get R and OS version
+      #   id: get-version
+      #   run: |
+      #     echo "os-version=sessionInfo()$running" >> $GITHUB_OUTPUT
+      #     echo "r-version=R.Version()$version.string" >> $GITHUB_OUTPUT
+      #   shell: Rscript {0}
         
       - name: Restore Renv package cache
         uses: actions/cache@v3
@@ -64,4 +64,5 @@ jobs:
 # Point to the right path, run the right Rscript command
       - name: Run automatic prediction file
         run: |
-          Rscript -e "library(targets); tar_make()"
+          Rscript -e "library(targets); tar_make(); tar_meta(fields = error, complete_only = TRUE)"
+          Rscript -e "library(targets); tar_meta(fields = error, complete_only = TRUE)"

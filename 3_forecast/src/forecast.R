@@ -98,9 +98,9 @@ get_obs_id_matrix = function(n_states, n_params_obs, n_params_est, n_step, obs){
 get_obs_matrix = function(obs_df, model_dates, n_step, n_states){
   
   # need to know location and time of observation
-  obs_df_filtered = tibble(time = model_dates) %>% 
-    left_join(obs_df, by = "time") %>% 
-    select(time, chla) %>% 
+  obs_df_filtered = tibble(datetime = model_dates) %>% 
+    left_join(obs_df, by = "datetime") %>% 
+    select(datetime, chla) %>% 
     mutate(time_step = 1:n()) 
   
   obs_matrix = array(NA, dim = c(n_states, 1, n_step))
@@ -260,11 +260,11 @@ forecast = function(trained_model,
   all_obs_df = filter(obs, 
                       site_id == site,
                       variable == "chla") %>% 
-    pivot_wider(names_from = variable, values_from = observed) %>% 
-    select(time, chla) 
+    pivot_wider(names_from = variable, values_from = observation) %>% 
+    select(datetime, chla) 
     
   obs_df = filter(all_obs_df,
-                  time >= start) 
+                  datetime >= start) 
   
   driver_vars <- lapply(c("predicted_mean", "predicted_max", "predicted_min"), 
                         function(x){paste(x, driver_vars, sep = "_")}) %>% unlist()
@@ -272,14 +272,14 @@ forecast = function(trained_model,
   historic_drivers_df = readRDS(historic_driver_file) %>% 
     filter(site_id == site) %>% 
     pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
-    select(time, ensemble, all_of(driver_vars)) %>% 
-    mutate(doy = lubridate::yday(time))
+    select(datetime, parameter, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(datetime))
   
   forecasted_drivers_df = readRDS(forecasted_driver_file) %>% 
-    filter(site_id == site, time >= stop) %>% 
+    filter(site_id == site, datetime >= stop) %>% 
     pivot_wider(names_from = variable, values_from = c(predicted_mean, predicted_max, predicted_min)) %>% 
-    select(time, ensemble, all_of(driver_vars)) %>% 
-    mutate(doy = lubridate::yday(time))
+    select(datetime, parameter, all_of(driver_vars)) %>% 
+    mutate(doy = lubridate::yday(datetime)) 
 
   n_states_est <- n_states_est # number of states we're estimating 
   
@@ -342,12 +342,12 @@ forecast = function(trained_model,
     for(n in 1:n_en){
       if(t < n_step){
         cur_drivers <- filter(historic_drivers_df, 
-                              time == dates[t],
-                              ensemble == n)
+                              datetime == dates[t],
+                              parameter == n)
       }else{
         cur_drivers <- filter(forecasted_drivers_df, 
-                              time == dates[t],
-                              ensemble == n)
+                              datetime == dates[t],
+                              parameter == n)
       }
        
       cur_drivers$chla_lagged_1 = mean(Y[1, t-1, ((n-1)*n_samples+1):(n*n_samples)], na.rm = T)
@@ -381,34 +381,35 @@ forecast = function(trained_model,
     }
   }
 
-  forecasted_dates <- unique(forecasted_drivers_df$time)
-  out <- expand_grid(time = forecasted_dates, 
+  forecasted_dates <- unique(forecasted_drivers_df$datetime)
+  out <- expand_grid(datetime = forecasted_dates, 
                      ensemble = 1:31, 
                      sample = 1:n_samples) %>% 
     mutate(chla = NA,
            site_id = site) 
   # store today's day 0 prediction in out
-  out$chla[out$time == forecasted_dates[1]] = Y[1,n_step,]
-  
+  out$chla[out$datetime == forecasted_dates[1]] = Y[1,n_step,]
+   
   for(t in 2:(f_horizon-1)){
     print(sprintf("starting %s", forecasted_dates[t]))
-    if(t < 17){
-      # 31 ensembles for first 16 days 
-      n_en = 31
-    }else{
-      # only 8 ensembles for days 17-35
-      n_en = 8
-    }
+    # if(t < 17){
+    #   # 31 ensembles for first 16 days 
+    #   n_en_max = 31
+    # }else{
+    #   # only 8 ensembles for days 17-35
+    #   n_en_max = 8
+    # }
      
     for(n in 1:n_en){
       if(t < 17){
-        ens_driver = n
-      }else{ens_driver = n}
+        ens_driver = n # all 31 ensembles available 
+        if(t == 16 & n == 31){ens_driver = 30} # 31st ensemble not available for day 16 
+      }else{ens_driver = ifelse(n <= 8, n, sample(1:8, 1))}
       cur_drivers <- filter(forecasted_drivers_df, 
-                            time == forecasted_dates[t],
-                            ensemble == ens_driver)
+                            datetime == forecasted_dates[t],
+                            parameter == ens_driver)
       chla_lagged_1 <- filter(out, 
-                              time == forecasted_dates[t-1],
+                              datetime == forecasted_dates[t-1],
                               ensemble == ens_driver) %>% 
         pull(chla) 
       
@@ -426,7 +427,7 @@ forecast = function(trained_model,
       #                              swrad = cur_drivers$surface_downwelling_shortwave_flux_in_air,
       #                              precip = cur_drivers$precipitation_flux)
        
-      out$chla[out$time == forecasted_dates[t] & out$ensemble == ens_driver] = model_output$chla 
+      out$chla[out$datetime == forecasted_dates[t] & out$ensemble == n] = model_output$chla 
       # Y_forecast[1, 1, t, n] = model_output$chla # store in Y vector
       # forcing to be positive 
       out$chla = ifelse(out$chla < 0, 0.01, out$chla)
@@ -434,11 +435,13 @@ forecast = function(trained_model,
   }
    
   out <- out %>% 
-    group_by(time) %>% 
-    mutate(ensemble = 1:n()) %>% 
-    ungroup() %>% select(-sample) %>% 
-    mutate(start_time = stop) %>% 
-    pivot_longer(chla, names_to = "variable", values_to = "predicted")
+    group_by(datetime) %>% 
+    mutate(parameter = 1:n(),
+           family = "ensemble") %>% 
+    ungroup() %>% select(-sample, -ensemble) %>% 
+    mutate(reference_datetime = stop) %>% 
+    pivot_longer(chla, names_to = "variable", values_to = "prediction") %>%
+    relocate(reference_datetime, datetime, site_id, family, parameter)
   
   write_csv(x = out, file = out_file)
   return(out_file) 
