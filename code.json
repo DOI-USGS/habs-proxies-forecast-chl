@@ -1,0 +1,74 @@
+[
+  {
+    "name": "habs-proxies-forecast-chl",
+    "organization": "U.S. Geological Survey",
+    "description": "Collection of code from the HABs Proxies group to forecast chl-a for Ecological Forecasting Challenge 2022 ",
+    "version": "main",
+    "status": "Development",
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain, CC0-1.0",
+          "URL": "https://github.com/USGS-R/habs-proxies-forecast-chl/blob/main/LICENSE.md"
+        }
+      ]
+    },
+    "homepageURL": "https://github.com/USGS-R/habs-proxies-forecast-chl/",
+    "downloadURL": "https://github.com/USGS-R/habs-proxies-forecast-chl/archive/refs/heads/main.zip",
+    "disclaimerURL": "https://github.com/USGS-R/habs-proxies-forecast-chl/blob/main/DISCLAIMER.md",
+    "repositoryURL": "https://github.com/USGS-R/habs-proxies-forecast-chl.git",
+    "vcs": "git",
+    "laborHours": -1,
+    "tags": [
+      "R",
+      "USGS"
+    ],
+    "languages": [
+      "R"
+    ],
+    "contact": {
+      "name": "jzwart",
+      "email": "FILL ME IN"
+    },
+    "date": {
+      "metadataLastUpdated": "2023-04-07"
+    }
+  },
+  {
+    "name": "",
+    "organization": "U.S. Geological Survey",
+    "description": "",
+    "version": "v0.0.0",
+    "status": "Ideation",
+    "permissions": {
+      "usageType": "openSource",
+      "licenses": [
+        {
+          "name": "Public Domain, CC0-1.0",
+          "URL": "LICENSE.md"
+        }
+      ]
+    },
+    "homepageURL": "",
+    "downloadURL": "",
+    "disclaimerURL": "",
+    "repositoryURL": "",
+    "vcs": "git",
+    "laborHours": 1,
+    "tags": [
+      "R",
+      "USGS"
+    ],
+    "languages": [
+      "R"
+    ],
+    "contact": {
+      "name": "",
+      "email": ""
+    },
+    "date": {
+      "metadataLastUpdated": "2022-10-16"
+    }
+  }
+]
